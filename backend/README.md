@@ -48,3 +48,9 @@ run: npm i  express bcryptjs mongoose cookie-parser nodemon dotenv jsonwebtoken 
  |                                                                         |---user exist . then upgrade providing credentials by user.
  |                                                                         |--- there one thing is important, Skills are stored in database string of array formate. i need to splite them.
  |                                                                         |---- after that i have to structured an object of user to return in client
+ |               └──| company.controller.js #logic building for comapny;
+ |---|routes
+ |              └──|user.route.js  // create http router with method. // export it in the index.js file.
+ |
+ |---|middlewares
+ |                       └──|isAuthenticates.js // check token valide or invalide with jwt and verify the user. export into routes file in the update route.

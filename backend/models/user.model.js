@@ -2,9 +2,8 @@ import mongoose from "mongoose";
 
 const UserScheme = new mongoose.Schema({
     fullname:{
-        tyep: String,
-        required: true,
-        trim: true,
+        type: String,
+        required: true
     },
     email:{
         type: String,
@@ -12,7 +11,7 @@ const UserScheme = new mongoose.Schema({
         unique: true
     },
     phoneNumber:{
-        type: Number,
+        type: String,
         required: true,
     },
     password:{
@@ -29,7 +28,7 @@ const UserScheme = new mongoose.Schema({
         skills: [{type: String}],
         resume:{type: String} ,// URL to resume file;
         resumeOriginalName: {type:String},
-        company:{type: mongoose.Scheme.Types.Ojbect, ref:'Company'},
+        company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
         profilePhoto:{
             type:String,
             default: ""

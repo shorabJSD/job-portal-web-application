@@ -1,10 +1,13 @@
-import bcript from 'bcryptjs';
-import { User } from '../models/user.model';
+import bcrypt from 'bcryptjs';
+import { User } from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 
 // Registration
 export const Register = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
         const { fullname, email, password, phoneNumber, role } = req.body;
         if (!fullname || !email || !password || !phoneNumber || !role) {
@@ -15,8 +18,10 @@ export const Register = async (req, res) => {
         }
 
         //check if user already exist;
-        const user = await User.findOne({ email })
+        const user = await User.findOne({ email }).session(session);
         if (user) {
+            await session.abortTransaction();
+            session.endSession();
             return res.status(400).json({
                 message: "User already exist",
                 success: false
@@ -24,9 +29,9 @@ export const Register = async (req, res) => {
         }
 
         // Generate hashed password;
-        const hashedPassword = await bcript.hash(password, 10)
+        const hashedPassword = await bcrypt.hash(password, 10)
         //create new users;
-        const newUser = new User.create({
+        const newUser = new User({
             fullname,
             email,
             password: hashedPassword,
@@ -34,21 +39,23 @@ export const Register = async (req, res) => {
             role
         });
 
-        await newUser.save();
-        console.log(newUser)
+        await newUser.save({ session });
+        await session.commitTransaction();
+        session.endSession();
 
         // success message;
-        if (newUser.success) {
-            return res.status(201).json({
-                message: "Account has been creating successfully",
-                success: true,
-            })
-        }
+        return res.status(201).json({
+            message: "Account has created successfully",
+            success: true,
+        })
 
     } catch (error) {
+        // Abort the transaction in case of an error
+        await session.abortTransaction();
+        session.endSession();
         return res.status(503).json({
             success: false,
-            message: "Error occuring somewhere"
+            message: "Oops! User registration failed."
         })
     }
 }
@@ -67,15 +74,15 @@ export const Login = async (req, res) => {
         let user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({
-                message: "Email or Password invalid.",
+                message: "Credentials are invalid",
                 success: false
             })
         }
         //check if password incorrect;
-        const isCorrectPassword = await bcript.compare(password, user.password);
+        const isCorrectPassword = await bcrypt.compare(password, user.password);
         if (!isCorrectPassword) {
             return res.status(400).json({
-                message: "Email or Password invalid.",
+                message: "Credentials are invalid",
                 success: false
             })
         }
@@ -104,13 +111,13 @@ export const Login = async (req, res) => {
         }
 
 
-  
-            return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpsOnly: true, sameSite: 'strict' }).json({
-                message: `Welcome back ${fullname}`,
-                success: true,
-                data: user,
-            })
-         
+
+        return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpsOnly: true, sameSite: 'strict' }).json({
+            message: `Welcome ${user.fullname}`,
+            success: true,
+            user,
+        })
+
 
     } catch (error) {
         console.log("login failed", error)
@@ -122,70 +129,78 @@ export const Login = async (req, res) => {
 }
 
 //logout;
-export const Logout = (req, res) =>{
+export const Logout = (req, res) => {
     try {
-        return res.status(200).cookie("token", "", {maxAge:0}).json({
-            message:"Logout has successfully",
+        return res.status(200).cookie("token", "", { maxAge: 0 }).json({
+            message: "Logout has successfully",
             success: true,
         })
     } catch (error) {
         console.error("Error occuring logout", error)
         return res.status(500).json({
-            message:"Somewhere occuring error,please check!",
+            message: "Somewhere occuring error,please check!",
             success: false,
         })
     }
 }
 
 //upgrading profile;
-export const udateProfile =async (req, res) =>{
-     try {
-        const {fullname, email, phoneNumber, bio, skills} = req.body;
-        const file =req.file;
-        if (!fullname || !email || !phoneNumber || !bio || !skills) {
-            return res.status(405).json({
-                success: false,
-                message: "Oops! Missed filling out some fields.Please complete all required inputs.",
-            })
-        }
+export const updateProfile = async (req, res) => {
+    try {
+        const { fullname, email, phoneNumber, bio, skills } = req.body;
+        const file = req.file; // Assuming you handle file uploads elsewhere
+
+        const userId = req.id; // Comes from middleware
+        let user = await User.findById(userId);
         
-        const userId = req.id; // comes from middleware;
-        const user = await User.findById(userId);
-        const isSkillArry = skills.split(",")
-        if(!user){
+        if (!user) {
             return res.status(401).json({
                 message: "Oops! User not found.",
-                success: true,
-                user
+                success: false, // Should be false in case of error
             });
         }
-        //Upgrade user data;
-        user.fullname = fullname;
-        user.email = email;
-        user.phoneNumber = phoneNumber;
-        user.profile.bio = bio;
-        user.profile.skills = isSkillArry;
+
+        // Convert skills string to array if provided
+        let skillsArray;
+        if (skills) {
+            skillsArray = skills.split(",").map(skill => skill.trim());
+        }
+
+        // Update user data
+        if (fullname) user.fullname = fullname;
+        if (email) user.email = email;
+        if (phoneNumber) user.phoneNumber = phoneNumber;
+        if (bio) user.profile.bio = bio;
+        if (skills) user.profile.skills = skillsArray;
+
+        // If there's a file, handle the file upload (assuming multer middleware or similar)
+        if (file) {
+            user.profile.avatar = file.path; // Save file path to user's profile
+        }
+
         await user.save();
 
-         user = {
-            _id:user._id,
+        // Construct the updated user response
+        const updatedUser = {
+            _id: user._id,
+            fullname: user.fullname,
             email: user.email,
             phoneNumber: user.phoneNumber,
             role: user.role,
             profile: user.profile,
-         }
+        };
 
         return res.status(200).json({
-            message: "Your profile has been successfully updated",
+            message: "Profile has been successfully updated",
             success: true,
-            user
+            user: updatedUser,
         });
 
-     } catch (error) {
-        console.log("Error occuring during upgrading your profile", error)
+    } catch (error) {
+        console.log("Error occurring during updating your profile", error);
         return res.status(500).json({
-            message:"Update failed. Please try again later or contact support if the issue persists",
+            message: "Update failed. Please try again later or contact support if the issue persists",
             success: false,
-        })
-     }
-}
+        });
+    }
+};

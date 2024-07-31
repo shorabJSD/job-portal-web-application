@@ -1,6 +1,10 @@
 import express from 'express';
-import { Login, Register, udateProfile } from '../controllers/user.controller.js';
+import { Login, Logout, Register,  updateProfile } from '../controllers/user.controller.js';
+import isAuthentication from '../middlewares/isAuthenticated.js';
 const router = express.Router();
-router.route('/login').post(Login)
+router.route('/login').get(Login)
 router.route('/register').post(Register);
-router.route('/profile/update').post(udateProfile);
+router.route('/logout').get(Logout)
+router.route('/profile/update/:id').put( isAuthentication, updateProfile);
+
+export default router;
