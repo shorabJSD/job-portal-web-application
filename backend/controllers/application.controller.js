@@ -100,7 +100,6 @@ export const getApplicants = async (req, res) => {
       }
     });
 
-    
     if (!job) {
       return res.status(402).json({
         message: "Oops! Not found job",
