@@ -1,17 +1,13 @@
 ✅what is AWS.
 Defination:AWS, or Amazon Web Services, is a cloud computing platform provided by Amazon. It offers a wide range of services and tools that allow businesses and developers to build, deploy, and manage applications on the internet.
 
-
 AWS is like a big toolbox for building and running software applications on the internet. Instead of having to buy and maintain physical servers and other hardware, you can use AWS to rent virtual resources and services on-demand. This includes things like storage, databases, networking, analytics, machine learning, and more.
 
 For example, if you want to host a website, store files, or run a database, you can use AWS services to do that without worrying about the underlying infrastructure. This flexibility allows businesses to scale their operations up or down based on demand, pay only for what they use, and access powerful computing resources that would otherwise be costly and complex to set up.
 
 AWS is widely used by startups, large enterprises, and government agencies because of its reliability, security, and wide range of services.
 
-
 ✅AWS service models
-
-
 
 AWS offers a wide range of services, organized into several service models that cater to different aspects of computing and data management. The primary service models of AWS are:
 
@@ -53,7 +49,6 @@ AWS offers a wide range of services, organized into several service models that 
 * **Amazon DynamoDB** : Fully managed NoSQL database service.
 
 These service models offer flexibility and scalability, allowing businesses to choose the best solutions for their specific needs, whether it's computing power, storage, application development, or specialized services like machine learning and analytics.
-
 
 ✅ Deployment models:
 

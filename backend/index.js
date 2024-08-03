@@ -4,6 +4,9 @@ import cors from 'cors';
 import  configDotenv  from 'dotenv';
 import connectDB from './utils/db.js';
 import userRouter from "../backend/routes/user.route.js";
+import companyRoute from '../backend/routes/company.route.js';
+ import jobRoute from '../backend/routes/job.route.js';
+import applicationRouter from '../backend/routes/application.route.js'
 const app = express();
 configDotenv.config({});
 
@@ -19,9 +22,13 @@ const corsOptions = {
 app.use(cors(corsOptions))
 const PORT =process.env.PORT || 3000;
 
-app.use("/api/v1/user", userRouter)
+app.use("/api/v1/user", userRouter);
+app.use('/api/v1/company', companyRoute);
+app.use('/api/v1/job', jobRoute);
+app.use("/api/v1/application" , applicationRouter);
+
 
 app.listen(PORT, ()=>{
     connectDB();
    console.log(`server has runing at port ${PORT}`);
-});
+}); 

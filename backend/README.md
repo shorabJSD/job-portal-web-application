@@ -49,8 +49,55 @@ run: npm i  express bcryptjs mongoose cookie-parser nodemon dotenv jsonwebtoken 
  |                                                                         |--- there one thing is important, Skills are stored in database string of array formate. i need to splite them.
  |                                                                         |---- after that i have to structured an object of user to return in client
  |               └──| company.controller.js #logic building for comapny;
+ |
+ |                                                                        ☑️   company register; // at first register as an user of reqruiter. after that start the process of registering company name and further.
+ |                                                                        |---Comapny name is required . building logic here. if not insert companyName return 400 status.
+ |                                                                        |--- find out company name by findOne method during registering. if  does already exist with same name return a message and status.
+ |                                                                        |---if doesnt exist the company name. then save it in database . having connection above to this line.
+ |                                                                        |---
+ |                                                                        ☑️   get all Companies here by user id.
+ |                                                                        |---get all companies by Company id.
+ |                                                                        ☑️get specific company then use userId of reqruiter...
+ |                                                                        ☑️ update company by user id..
+ |                                                                        |---first destructure the key of value which value need to update and req.body
+ |                                                                        |---create a var where would include updateDate that we have destructure already above the line.
+ |                                                                        |---then update the data into the findByIdAndUpdate() method
+ |                                                                        |---During updating data , include req.params.id , updateDate, {new:true} inside the method above
+ |
+ |                      └──| Job.controller.js #logic building for job post;
+ |                                                                       ☑️at first have to create job post logic by following the job models.
+ |                                                                        |--- check if any fields are empty ? return missing something and bad request.
+ |                                                                        |--- then create Job object and save it in database.
+ |                                                                       ☑️   get all Jobs post for students .
+ |                                                                        |---create query search bacise on title and description, include some query operation with regex;
+ |                                                                       ☑️get admin jobs post while logged in admin.
+ |                                                                        |---find the admin id, means created_by jobs?
+ |                                                                       ☑️Get all jobs by id for students.
+ |                                                                        |---find the jobs id
+ |                                                                        |---
+ |
+ |                      └──| application.controller.js //buiding logic..
+ |                                                                       ☑️find
+ |                                                                        |---`const userId = req.id;      const jobId = req.params.id;`
+ |                                                                        |---check with the userId and jobId , user already applied or not? then retrun message and request
+ |                                                                        |---find job and check job exist or not by job id?
+ |                                                                        |---now create new jobApplication object with job and application;
+ |                                                                        ☑️get applications who applied the job
+ |                                                                        |--- check with userId of the application. add job and company path;
+ |                                                                        ☑️get all applications for admin who applied on that job.
+ |                                                                        |---find jobId. populate applicants and applications;
+ |                                                                        ☑️udate status
+ |                                                                        |---request status to body
+ |                                                                        |---find application id req.params.id
+ |                                                                        |---
+ |
  |---|routes
- |              └──|user.route.js  // create http router with method. // export it in the index.js file.
+ |              └──|user.route.js // create route with method. // export it in the index.js file.//recive the route into index file.
+ |              └──|company.route.js // create route with method. //recive the route into index file.
  |
  |---|middlewares
- |                       └──|isAuthenticates.js // check token valide or invalide with jwt and verify the user. export into routes file in the update route.
+ |                       └──| isAuthenticates.js // check token valide or invalide with jwt and verify the user. export into routes file in the update route.and others
+
+constuserId= req.id;
+
+    constjobId= req.params.id;
